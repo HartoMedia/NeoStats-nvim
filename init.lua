@@ -46,4 +46,4 @@ vim.api.nvim_create_autocmd("VimLeavePre", {
 vim.api.nvim_create_user_command('NeoStats', M.neostats, {})
 
 return M
-
+-- dies ist ein kleiner Test comment
