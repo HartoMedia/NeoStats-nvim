@@ -1,7 +1,6 @@
 -- ~/.config/nvim/lua/neostats/init.lua
 local M = {}
 local session_start_time
-
 -- Define days and months to handle leap years
 local function is_leap_year(year)
   return (year % 4 == 0 and year % 100 ~= 0) or (year % 400 == 0)
@@ -80,7 +79,6 @@ function M.neostats_end()
   end
 end
 
-
 function M.neostats()
   local file_path = vim.fn.stdpath('data') .. '/sessions.csv'
   local file = io.open(file_path, "r")
@@ -101,20 +99,36 @@ function M.neostats()
     file:close()
   end
 
+  local month_letters = {
+    ['01'] = 'J', -- January
+    ['02'] = 'F', -- February
+    ['03'] = 'M', -- March
+    ['04'] = 'A', -- April
+    ['05'] = 'M', -- May
+    ['06'] = 'J', -- June
+    ['07'] = 'J', -- July
+    ['08'] = 'A', -- August
+    ['09'] = 'S', -- September
+    ['10'] = 'O', -- October
+    ['11'] = 'N', -- November
+    ['12'] = 'D', -- December
+  }
+
   local year_days = generate_year_days(os.date("*t").year)
   local visualization = {}
-  local last_month = nil
+  local last_month = '12'
   for _, day in ipairs(year_days) do
     local current_month = day:sub(6, 7)  -- Extract the month from "YYYY-MM-DD"
     if last_month and last_month ~= current_month then
-      table.insert(visualization, '\n')  -- Add a new line at the end of a month
+      -- Add a new line and the month letter at the end of a month
+      table.insert(visualization, '\n' .. (month_letters[current_month] or ""))
     end
     last_month = current_month
     local duration = session_durations[day] or 0
     local symbol
     if duration == 0 then
       symbol = '·'
-  elseif duration < 3600 then
+    elseif duration < 3600 then
       symbol = '░'
     elseif duration < 10800 then
       symbol = '▒'
@@ -125,7 +139,11 @@ function M.neostats()
     end
     table.insert(visualization, symbol)
   end
+
+  -- Print the complete visualization
   print(table.concat(visualization))
+  print("Legend:")
+  print("· = No data; ░ = less than 1h; ▒ = less than 3h; ▓ = less than 6h; █ = more than 6h")
 end
 
 -- Autocommands
